@@ -1,0 +1,153 @@
+---
+title: "Dow Jones Data Challenge"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+#installing necessary packages
+library(dplyr)
+library(naniar)
+library(magrittr)
+library(ggplot2)
+library(readr)
+library(DT)
+```
+
+Reading our dataset 
+```{r}
+dataset <- read_csv("~/Desktop/DowJones/dataset.csv")
+
+#first 6 rows of our dataset
+head(dataset)
+```
+
+Dimensions of our dataset
+```{r}
+dim(dataset)
+```
+
+Checking for missing values
+```{r}
+miss_var_summary(dataset)
+gg_miss_var(dataset, show_pct = TRUE)
+```
+
+Checking for outliers
+```{r}
+boxplot(dataset$viewsPolitics)
+```
+
+```{r}
+quantile(dataset$viewsPolitics)
+```
+
+Insight #1: Students
+```{r}
+#Creating a subset of our data to only show which users are students
+student_users <- dataset %>% filter(dataset$student == 1)
+head(student_users)
+```
+
+```{r}
+ggplot(student_users, aes(student_users$favoriteSection)) + geom_bar(fill = "#f2d56b") + ggtitle("Count of Favorite Section and Student Users") + labs(x = "Favorite Section")
+```
+
+The above graph shows us that a small group of students are interested in the Politics section. We can also analyze the number of active days in the last four weeks for students. This would give a better understanding of student demographics
+
+```{r}
+ggplot(student_users, aes(student_users$activeDays)) + geom_bar(fill = "#f2d56b") + ggtitle("Number of Active Days for Students") + labs(x = "active days")
+```
+
+From the above graph we can see that students are mostly inactive and do not read as many articles. Based on this, we can say that our product target audience would not be students. If WSJ would like to have students as their target audience, it is important to find different mediums that would make it interesting for students to read/listen. For example: a podcast.
+
+Insight #2: WSJ Mediums
+```{r}
+#aggregating data based on print media
+print_data <- dataset %>% group_by(print) %>% dplyr::summarize(Total = n())
+datatable(print_data)
+```
+
+```{r}
+#using ggplot to visualize our print data
+ggplot(print_data, aes(print, Total)) + geom_bar(stat = "identity", width = 0.4, fill="#f05d5d") + ggtitle("Users with Print Membership") + theme(aspect.ratio = 2/1)
+```
+
+```{r}
+#aggregating data based on newsletter media
+newsletter_data <- dataset %>% group_by(newsletterActivated) %>% dplyr::summarize(Total = n())
+datatable(newsletter_data)
+```
+
+```{r}
+#using ggplot to visualize our newsletter data
+ggplot(newsletter_data, aes(newsletterActivated, Total)) + geom_bar(stat = "identity", width = 0.4, fill="#f05d5d") + ggtitle("Users who have Activated Newsletter") + theme(aspect.ratio = 2/1)
+```
+
+```{r}
+#aggregating data based on WSJ app downloaded
+app_data <- dataset %>% group_by(appActivated) %>% dplyr::summarize(Total = n())
+datatable(app_data)
+```
+
+```{r}
+#using ggplot to visualize our WSJ app activated data
+ggplot(app_data, aes(appActivated, Total)) + geom_bar(stat = "identity", width = 0.4, fill="#f05d5d") + ggtitle("Users who have Activated the WSJ App") + theme(aspect.ratio = 2/1)
+```
+
+Recommendations: Based on the above data, it is recommended that the best way to deliver content for the new product would be through the WSJ app. About half of the users (~50.2%) have the app downloaded as compared the users who have subscribed to the newsletter or receive print media.
+
+
+Inisght #3: Devices
+```{r}
+#aggregating data based on desktop
+desktop_data <- dataset %>% group_by(desktop) %>% dplyr::summarize(Total = n())
+datatable(desktop_data)
+```
+
+```{r}
+#using ggplot to visualize our desktop data
+ggplot(desktop_data, aes(desktop, Total)) + geom_bar(stat = "identity", width = 0.4, fill="#34baad") + ggtitle("Users who are Active on a Desktop") + theme(aspect.ratio = 2/1)
+```
+
+```{r}
+#aggregating data based on mobile
+mobile_data <- dataset %>% group_by(mobile) %>% dplyr::summarize(Total = n())
+datatable(mobile_data)
+```
+
+```{r}
+#using ggplot to visualize our mobile data
+ggplot(mobile_data, aes(mobile, Total)) + geom_bar(stat = "identity", width = 0.4, fill="#34baad") + ggtitle("Users who are Active on a Mobile") + theme(aspect.ratio = 2/1)
+```
+
+```{r}
+#aggregating data based on mac
+mac_data <- dataset %>% group_by(mac) %>% dplyr::summarize(Total = n())
+datatable(mac_data)
+```
+
+```{r}
+#using ggplot to visualize our mac data
+ggplot(mac_data, aes(mac, Total)) + geom_bar(stat = "identity", width = 0.4, fill="#34baad") + ggtitle("Users who are Active on a Mac") + theme(aspect.ratio = 2/1)
+```
+
+Recommendations: Based on the above, users are active on all devices in a similar manner, however, Mac takes the majority of users. Therefore, a vital insight to this product could be making sure the product is catered to Mac users.
+
+Insight #3: Political Affiliation
+```{r}
+#aggregating data based on affiliation and favorite section
+affiliation_data <- dataset %>% group_by(`Political Affiliation`, favoriteSection) %>% dplyr::summarize(Total = n())
+datatable(affiliation_data)
+```
+
+```{r}
+ggplot(affiliation_data, aes(`Political Affiliation`, Total, fill = favoriteSection)) + geom_bar(stat = "identity") + ggtitle("Favorite Section between Democrats, Republicans and Undecided") 
+```
+
+Conclusion: it seems that regardless of political party, users read the same content and have a preference for similar sections.
+
+
+
+
